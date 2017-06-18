@@ -17,13 +17,13 @@ import java.util.concurrent.TimeUnit;
 
 public class main {
 
-	String link = null;
-	String templink = null;
-	ArrayList<String> list = new ArrayList<String>(1);
-	URL url = null;
-	int page = 0;
+	static String link = null;
+	static String templink = null;
+	static ArrayList<String> list = new ArrayList<String>(1);
+	static URL url = null;
+	static int page = 0;
 
-	public void main(String args[]) {
+	public static void main(String args[]) {
 		JFrame window = new JFrame("Craigslist Crawler");
 		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		int region = 0;
@@ -61,7 +61,7 @@ public class main {
 		x.close();
 	}
 
-	public void crawl(String a, String b, int region) {
+	public static void crawl(String a, String b, int region) {
 		if (region != 1 && region != 2) {
 			System.out.println("You did not select a valid region. Exiting.");
 			return;
@@ -87,7 +87,7 @@ public class main {
 			System.out.println(list.get(i));
 	}
 
-	public void getLinkByTitle(String a, String b, int region) {
+	public static void getLinkByTitle(String a, String b, int region) {
 		try {
 			url = new URL(templink);
 		} catch (MalformedURLException e) {
@@ -140,7 +140,7 @@ public class main {
 		getLinkByTitle(a, b, region);
 	}
 
-	public void getLinkByDesc(String a, String b, int region) {
+	public static void getLinkByDesc(String a, String b, int region) {
 		try {
 			url = new URL(templink);
 		} catch (MalformedURLException e) {
@@ -213,7 +213,7 @@ public class main {
 		getLinkByTitle(a, b, region);
 	}
 
-	public String getAgent() {
+	public static String getAgent() {
 		Random rand = new Random();
 		long randomtime = rand.nextInt(4000) + 100;
 		try {
