@@ -24,13 +24,12 @@ public class Runner {
 			             "(3) All\n");
 		int category = x.nextInt();
 
-        Query query = new Query(region, category);
-        query.Populate();
+        Query query = new Query(region, category, false);
 
 		ArrayList<SearchResult> results = query.getResults();
 
 		for (SearchResult s : results)
-			System.out.println(s.getTitle() + " - $" + s.getPrice() + " /// " + s.getLink());
+			System.out.println(String.format("$%-4d - %-90s / %s", s.getPrice(), s.getTitle(), s.getLink()));
 
 		System.out.println();
 		System.out.println("Success! Found " + results.size() + " Results.");

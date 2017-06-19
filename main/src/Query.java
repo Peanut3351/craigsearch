@@ -8,15 +8,17 @@ import java.util.ArrayList;
  * Created by lain on 6/18/17.
  **/
 class Query {
-    Query(int region, int category) {
+    Query(int region, int category, boolean getDescriptions) {
         String link = regions[region];
         link += "/search/";
         link += categories[category];
         this.link = link;
 	    this.region = region;
+
+	    Populate(getDescriptions);
     }
 
-    void Populate() {
+    private void Populate(boolean getDescriptions) {
         try {
 	        System.setProperty("https.agent", "");
 
