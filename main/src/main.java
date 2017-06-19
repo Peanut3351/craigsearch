@@ -33,35 +33,49 @@ public class main {
 		System.out.print("Second search term: ");
 		String b = x.nextLine();
 		System.out.print("Input region:\n(1) Jersey Shore\n(2) Raleigh\n");
-		String c = x.nextLine();
+		int c = x.nextInt();
 		System.out.print("Input category:\n(1) Computer Systems\n(2) Auto Parts\n(3) Cars by owner\n(4) All\n");
-		String d = x.nextLine();
-		if (c.equals("1")) {
-			link = "https://jerseyshore.craigslist.org/search/";
-			region = 1;
-		}
-		if (c.equals("2")) {
-			link = "https://raleigh.craigslist.org/search/";
-			region = 2;
-		}
-		if (d.equals("1")) {
+		int d = x.nextInt();
+
+        if (c == 1) {
+            link = "https://jerseyshore.craigslist.org/search/";
+            region = 1;
+        }
+        if (c == 2) {
+            link = "https://raleigh.craigslist.org/search/";
+            region = 2;
+        }
+
+		if (d == 1) {
 			link += "sys";
 		}
-		if (d.equals("2")) {
+		if (d == 2) {
 			link += "pta";
 		}
-		if (d.equals("3")) {
+		if (d == 3) {
 			link += "cto";
 		}
-		if (d.equals("4")) {
+		if (d == 4) {
 			link += "sss";
 		}
-		templink = link;
-		crawl(a, b, region);
+
+
+		//templink = link;
+		//crawl(a, b, region);
+        Query query = new Query(link);
+        query.Populate(region);
+
+        ArrayList<SearchResult> results = new ArrayList<>();
+        results = query.getResults();
+
+		for (SearchResult s : results)
+			System.out.println(s.getTitle() + " - " + s.getPrice() + ":" + s.getLink());
+
 		x.close();
 	}
 
-	public static void crawl(String a, String b, int region) {
+
+    public static void crawl(String a, String b, int region) {
 		if (region != 1 && region != 2) {
 			System.out.println("You did not select a valid region. Exiting.");
 			return;
@@ -86,6 +100,10 @@ public class main {
 		for (int i = 0; i < list.size(); i++)
 			System.out.println(list.get(i));
 	}
+
+	public static void getResults(int region) {
+
+    }
 
 	public static void getLinkByTitle(String a, String b, int region) {
 		try {
@@ -146,6 +164,7 @@ public class main {
 		} catch (MalformedURLException e) {
 			throw new RuntimeException(e);
 		}
+
 		System.setProperty("https.agent", "");
 		HttpsURLConnection c;
 		String line;
