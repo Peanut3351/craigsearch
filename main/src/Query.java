@@ -49,6 +49,11 @@ public class Query {
                     results.add(new SearchResult(tName, "<Placeholder>", tPrice, tUrl));
                 }
                 if (line.contains("result-title")) { //Checks for a title
+                    /*
+                    Before you say anything about this next block, or even think about touching it
+                    Ask yourself, is it worth breaking everything?
+                    TL;DR, magic numbers  (╯°□°）╯︵ ┻━┻
+                     */
                     if (region == 1) {
                         tUrl = "https://jerseyshore.craigslist.org" + line.substring(17, 37);
                         tName = line.substring(line.indexOf("result-title") + 21, line.indexOf("</a>"));
