@@ -1,106 +1,101 @@
-/**
- * Created by lain on 6/18/17.
- */
 import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.reflect.Array;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 
-@SuppressWarnings("Duplicates")
-public class Query {
-    Query(String link) {
+/**
+ * Created by lain on 6/18/17.
+ **/
+class Query {
+    Query(int region, int category) {
+        String link = regions[region];
+        link += "/search/";
+        link += categories[category];
         this.link = link;
+	    this.region = region;
     }
 
-    public void Populate(int region) {
-        URL url = null;
+    void Populate() {
         try {
-            url = new URL(link);
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        }
+	        System.setProperty("https.agent", "");
 
-        System.setProperty("https.agent", "");
-        HttpsURLConnection conn;
-
-        String line;
-        String tUrl = null; //Stores URL
-        String tName = null; //Stores the name of the listing
-        String tPrice = null; //Stores the price of the listing
-
-        try {
-            conn = (HttpsURLConnection) url.openConnection();
-            conn.setRequestProperty("User-Agent", main.getAgent());
+            URL url = new URL(link);
+            HttpsURLConnection conn = (HttpsURLConnection)url.openConnection();
+            conn.setRequestProperty("User-Agent", Randomizer.getAgent());
             conn.connect();
-        } catch (IOException e) {
-            throw new RuntimeException(e); //Fuck Java
-        }
 
-        boolean inListing = false;
+            if (!parsePage(conn)) return;
+	        Randomizer.randSleep();
 
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"))) {
-            while ((line = reader.readLine()) != null) {
-                if (line.contains(("result-price")) && inListing == true) { //If a listing was found in the previous loop, grab the price
-                    tPrice = line.substring(line.indexOf("$"), line.indexOf("</span>"));
-                    results.add(new SearchResult(tName, "<Placeholder>", tPrice, tUrl));
-                }
-                if (line.contains("result-title")) { //Checks for a title
-                    if (region == 1) {
-                        tUrl = "https://jerseyshore.craigslist.org" + line.substring(17, 37);
-                        tName = line.substring(line.indexOf("result-title") + 21, line.indexOf("</a>"));
-                        inListing = true;
-                    }
-                    if (region == 2) {
-                        tUrl = "https://raleigh.craigslist.org" + line.substring(17, 37);
-                        tName = line.substring(line.indexOf("result-title") + 21, line.indexOf("</a>"));
-                        inListing = true;
-                    }
-                }
-                if (line.contains("no result")) {
-                    return;
-                }
+            for (int i = 120; i <= 4800; i += 120) {
+            	url = new URL(link + "?s=" + i);
+	            conn = (HttpsURLConnection)url.openConnection();
+	            conn.setRequestProperty("User-Agent", Randomizer.getAgent());
+	            conn.connect();
+
+				if (!parsePage(conn)) return;
+	            Randomizer.randSleep();
             }
-        } catch (IOException e) {
-            throw new RuntimeException(e); //Fuck Java
+
+        } catch (java.lang.Throwable e) {
+            System.out.println(e.getMessage());
+            for (StackTraceElement s : e.getStackTrace())
+            	System.out.println(s);
         }
     }
 
-    public ArrayList<SearchResult> getResults() {
-        ArrayList<SearchResult> res = new ArrayList<>();
-        for (SearchResult s : results)
-            res.add(s);
-        return res;
+    private boolean parsePage(HttpsURLConnection conn) {
+	    String line;
+	    String tUrl = null;
+	    String tName = null;
+	    int tPrice;
+
+	    boolean inListing = false;
+
+	    try {
+		    BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
+		    while ((line = reader.readLine()) != null) {
+			    if (line.contains("result-price") && inListing) { //If a listing was found in the previous loop, grab the price
+				    tPrice = Integer.parseInt(line.substring(line.indexOf("$") + 1, line.indexOf("</span>")));
+				    results.add(new SearchResult(tName, tPrice, tUrl));
+				    inListing = false;
+			    }
+			    if (line.contains("result-title")) { //Checks for a title
+				    tUrl = regions[region] + line.substring(17, 37);
+				    tName = line.substring(line.indexOf("result-title") + 21, line.indexOf("</a>"));
+				    inListing = true;
+			    }
+
+			    if (line.contains("no result")) return false;
+			    if (line.contains("an end is a beginning")) return false;
+		    }
+	    } catch (java.lang.Throwable e) {
+		    System.out.println(e.getMessage());
+		    for (StackTraceElement s : e.getStackTrace())
+			    System.out.println(s);
+	    }
+
+	    return true;
     }
 
-    public ArrayList<SearchResult> getResultTitle(String str) {
-        ArrayList<SearchResult> res = new ArrayList<>();
-        for (SearchResult s : results)
-            if (s.getTitle().contains(str))
-                res.add(s);
-        return res;
-    }
-
-    public ArrayList<SearchResult> getResultTitle(ArrayList<String> strings) {
-        ArrayList<SearchResult> res = new ArrayList<>();
-        for (String str : strings)
-            for (SearchResult s : results)
-                if (s.getTitle().contains(str))
-                    res.add(s);
-        return res;
-    }
-
-    public ArrayList<SearchResult> getResultPrice(int price) {
-        ArrayList<SearchResult> res = new ArrayList<>();
-        for (SearchResult s : results)
-            if (Integer.parseInt(s.getPrice().substring(s.getPrice().indexOf('$') + 1)) <= price)
-                res.add(s);
-        return res;
+    ArrayList<SearchResult> getResults() {
+        return results;
     }
 
     private String link;
+    private int region;
     private ArrayList<SearchResult> results = new ArrayList<>();
+
+    private static String[] regions = {
+        "https://jerseyshore.craigslist.org",
+        "https://raleigh.craigslist.org"
+    };
+
+    private static String[] categories = {
+        "sys",
+        "pta",
+        "cto",
+        "sss"
+    };
 }
